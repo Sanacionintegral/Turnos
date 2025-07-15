@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -49,7 +50,7 @@
     <img src="Imagenturno.png" alt="Turnos">
     <input type="text" id="nombre" placeholder="Tu nombre" required>
     <input type="text" id="celular" placeholder="Tu celular" required>
-    <select id="dia" required>
+    <select id="dia" required onchange="cargarHorariosDisponibles()">
       <option value="">Seleccioná el día</option>
       <option value="Lunes">Lunes</option>
       <option value="Martes">Martes</option>
@@ -64,8 +65,6 @@
   </div>
 
   <script>
-    let horariosDisponibles = [];
-
     async function cargarHorariosDisponibles() {
       const dia = document.getElementById('dia').value;
       const selectHorario = document.getElementById('horario');
@@ -81,23 +80,16 @@
                                   .filter(f => f[0]?.trim().toLowerCase() === dia.toLowerCase())
                                   .map(f => f[1]?.trim());
 
-      horariosDisponibles = [];
       for (let h = 6; h <= 19; h++) {
         const hora = `${h.toString().padStart(2, '0')}:00`;
         if (!turnosOcupados.includes(hora)) {
-          horariosDisponibles.push(hora);
+          const option = document.createElement('option');
+          option.value = hora;
+          option.textContent = hora;
+          selectHorario.appendChild(option);
         }
       }
-
-      horariosDisponibles.forEach(hora => {
-        const option = document.createElement('option');
-        option.value = hora;
-        option.textContent = hora;
-        selectHorario.appendChild(option);
-      });
     }
-
-    document.getElementById('dia').addEventListener('change', cargarHorariosDisponibles);
 
     async function reservarTurno() {
       const nombre = document.getElementById('nombre').value.trim();
@@ -110,35 +102,25 @@
         return;
       }
 
-      const datos = {
-        dia,
-        hora: horario,
-        nombre,
-        celular
-      };
+      const datos = { dia, hora: horario, nombre, celular };
 
       await fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       });
+
+      alert("Tu turno fue reservado");
 
       const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario}.`;
       window.open(`https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`);
 
-      alert("Tu turno fue reservado");
-
       document.getElementById('nombre').value = "";
       document.getElementById('celular').value = "";
+      document.getElementById('dia').value = "";
       document.getElementById('horario').innerHTML = '<option value="">Seleccioná el horario</option>';
-
-      setTimeout(cargarHorariosDisponibles, 1500);
     }
   </script>
 </body>
 </html>
-
-
