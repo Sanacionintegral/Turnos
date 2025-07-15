@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -65,6 +64,8 @@
   </div>
 
   <script>
+    let horariosDisponibles = [];
+
     async function cargarHorariosDisponibles() {
       const dia = document.getElementById('dia').value;
       const selectHorario = document.getElementById('horario');
@@ -80,12 +81,12 @@
                                   .filter(f => f[0] && f[0].toLowerCase() === dia.toLowerCase())
                                   .map(f => f[1]?.trim());
 
-      const horarios = [];
+      horariosDisponibles = [];
       for (let h = 6; h <= 19; h++) {
-        horarios.push(`${h.toString().padStart(2, '0')}:00`);
+        horariosDisponibles.push(`${h.toString().padStart(2, '0')}:00`);
       }
 
-      horarios.forEach(hora => {
+      horariosDisponibles.forEach(hora => {
         const label = `${dia} ${hora}`;
         if (!turnosOcupados.includes(label)) {
           const option = document.createElement('option');
@@ -130,14 +131,13 @@
 
       alert("Tu turno fue reservado");
 
-      // Limpiar campos
       document.getElementById('nombre').value = "";
       document.getElementById('celular').value = "";
       document.getElementById('horario').innerHTML = '<option value="">Seleccioná el horario</option>';
 
-      // Volver a cargar los horarios disponibles
-      setTimeout(cargarHorariosDisponibles, 2000);
+      setTimeout(cargarHorariosDisponibles, 1000);
     }
   </script>
 </body>
 </html>
+
