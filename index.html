@@ -64,8 +64,6 @@
   </div>
 
   <script>
-    let horariosDisponibles = [];
-
     async function cargarHorariosDisponibles() {
       const dia = document.getElementById('dia').value;
       const selectHorario = document.getElementById('horario');
@@ -78,23 +76,18 @@
       const filas = csv.split("\n").slice(1);
 
       const turnosOcupados = filas.map(f => f.split(","))
-                                  .filter(f => f[0] && f[0].toLowerCase() === dia.toLowerCase())
+                                  .filter(f => f[0].toLowerCase() === dia.toLowerCase())
                                   .map(f => f[1]?.trim());
 
-      horariosDisponibles = [];
       for (let h = 6; h <= 19; h++) {
-        horariosDisponibles.push(`${h.toString().padStart(2, '0')}:00`);
-      }
-
-      horariosDisponibles.forEach(hora => {
-        const label = `${dia} ${hora}`;
-        if (!turnosOcupados.includes(label)) {
+        const hora = `${h.toString().padStart(2, '0')}:00`;
+        if (!turnosOcupados.includes(hora)) {
           const option = document.createElement('option');
-          option.value = label;
+          option.value = hora;
           option.textContent = hora;
           selectHorario.appendChild(option);
         }
-      });
+      }
     }
 
     document.getElementById('dia').addEventListener('change', cargarHorariosDisponibles);
@@ -126,7 +119,7 @@
         body: JSON.stringify(datos)
       });
 
-      const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario.split(' ')[1]}.`;
+      const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario}.`;
       window.open(`https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`);
 
       alert("Tu turno fue reservado");
