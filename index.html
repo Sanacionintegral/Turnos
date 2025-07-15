@@ -84,8 +84,7 @@
       horariosDisponibles = [];
       for (let h = 6; h <= 19; h++) {
         const hora = `${h.toString().padStart(2, '0')}:00`;
-        const etiqueta = `${dia} ${hora}`;
-        if (!turnosOcupados.includes(hora) && !turnosOcupados.includes(etiqueta)) {
+        if (!turnosOcupados.includes(hora)) {
           horariosDisponibles.push(hora);
         }
       }
@@ -136,7 +135,7 @@
       document.getElementById('celular').value = "";
       document.getElementById('horario').innerHTML = '<option value="">Seleccioná el horario</option>';
 
-      setTimeout(cargarHorariosDisponibles, 1000);
+      setTimeout(cargarHorariosDisponibles, 1500);
     }
   </script>
 </body>
