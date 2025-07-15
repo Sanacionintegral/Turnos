@@ -2,62 +2,64 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Turnos disponibles</title>
   <style>
     body {
-      background-color: #1f1033;
       font-family: 'Segoe UI', sans-serif;
+      background-color: #2b1035;
       color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      text-align: center;
+      padding: 40px;
+    }
+    .form-container {
+      background: #3a1752;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
     }
     h1 {
-      color: #d7baff;
-    }
-    form {
-      background-color: #2a1946;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      width: 300px;
+      color: #dcb1ff;
     }
     input, select, button {
-      margin-bottom: 15px;
+      margin: 10px 0;
       padding: 10px;
       border: none;
+      width: 100%;
       border-radius: 5px;
       font-size: 16px;
     }
     button {
-      background-color: #25D366;
+      background-color: #a86ff9;
       color: white;
       cursor: pointer;
     }
     button:hover {
-      background-color: #1ebe5d;
+      background-color: #8d55e9;
     }
-    .confirmation {
-      margin-top: 20px;
-      background-color: #25D366;
+    .success {
+      background-color: #4caf50;
       padding: 10px;
+      margin-top: 20px;
       border-radius: 5px;
-      color: white;
-      display: none;
+    }
+    .error {
+      background-color: #e53935;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Reservá tu turno</h1>
-  <form id="turnoForm">
-    <input type="text" id="nombre" placeholder="Tu nombre" required>
-    <input type="text" id="celular" placeholder="Tu celular" required>
-    <select id="dia" required>
+  <div class="form-container">
+    <h1>Reservá tu turno</h1>
+    <input type="text" id="nombre" placeholder="Tu nombre" required />
+    <input type="text" id="celular" placeholder="Tu celular" required />
+
+    <select id="dia">
       <option value="">Seleccioná el día</option>
       <option value="Lunes">Lunes</option>
       <option value="Martes">Martes</option>
@@ -65,68 +67,81 @@
       <option value="Jueves">Jueves</option>
       <option value="Viernes">Viernes</option>
     </select>
-    <select id="hora" required>
+
+    <select id="hora">
       <option value="">Seleccioná el horario</option>
     </select>
-    <button type="submit">Reservar</button>
-  </form>
 
-  <div class="confirmation" id="confirmacion">
-    ✔ Turno reservado correctamente. Redirigiendo a WhatsApp...
+    <button onclick="reservarTurno()">Reservar turno</button>
+
+    <div id="mensaje"></div>
   </div>
 
   <script>
-    // Generar horarios de 45 minutos desde las 06:00 hasta las 20:00
-    const horaInicio = 6;
-    const horaFin = 20;
-    const selectHora = document.getElementById("hora");
+    const horarios = [
+      "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
+      "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+    ];
 
-    for(let h = horaInicio; h < horaFin; h++) {
-      const horaTexto = ("0" + h).slice(-2) + ":00";
-      const option = document.createElement("option");
-      option.value = horaTexto;
-      option.textContent = horaTexto;
-      selectHora.appendChild(option);
+    const ocupados = [];
+
+    function actualizarHorarios() {
+      const dia = document.getElementById("dia").value;
+      const selectHora = document.getElementById("hora");
+      selectHora.innerHTML = '<option value="">Seleccioná el horario</option>';
+
+      horarios.forEach(h => {
+        const yaReservado = ocupados.some(o => o.dia === dia && o.hora === h);
+        if (!yaReservado) {
+          const option = document.createElement("option");
+          option.value = h;
+          option.textContent = h;
+          selectHora.appendChild(option);
+        }
+      });
     }
 
-    document.getElementById("turnoForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+    document.getElementById("dia").addEventListener("change", actualizarHorarios);
 
-      const nombre = document.getElementById("nombre").value.trim();
-      const celular = document.getElementById("celular").value.trim();
+    function reservarTurno() {
+      const nombre = document.getElementById("nombre").value;
+      const celular = document.getElementById("celular").value;
       const dia = document.getElementById("dia").value;
       const hora = document.getElementById("hora").value;
 
       if (!nombre || !celular || !dia || !hora) {
-        alert("Por favor completá todos los campos.");
+        mostrarMensaje("Completá todos los campos", false);
         return;
       }
-
-      const fecha = new Date().toLocaleDateString("es-AR");
 
       fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fecha: fecha,
-          hora: `${dia} ${hora}`,
-          nombre: nombre,
-          celular: celular
+          fecha: new Date().toLocaleDateString(),
+          hora: dia + " " + hora,
+          nombre,
+          celular
         })
       });
 
-      document.getElementById("confirmacion").style.display = "block";
+      ocupados.push({ dia, hora });
+      actualizarHorarios();
+      mostrarMensaje("Turno reservado correctamente. Se abrirá WhatsApp...", true);
 
-      const mensaje = encodeURIComponent(`Hola! Ya reservé mi turno para el ${dia} a las ${hora}`);
-      const url = `https://wa.me/542235931151?text=${mensaje}`;
       setTimeout(() => {
-        window.location.href = url;
+        window.open(`https://wa.me/542235931151?text=Hola!%20Ya%20reservé%20mi%20turno%20para%20el%20día%20${dia}%20a%20las%20${hora}`, '_blank');
       }, 2000);
-    });
+    }
+
+    function mostrarMensaje(texto, exito) {
+      const div = document.getElementById("mensaje");
+      div.className = exito ? "success" : "error";
+      div.innerText = texto;
+    }
   </script>
 </body>
 </html>
+
 
