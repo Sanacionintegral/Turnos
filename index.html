@@ -98,7 +98,7 @@
 
     document.getElementById('dia').addEventListener('change', cargarHorariosDisponibles);
 
-    function reservarTurno() {
+    async function reservarTurno() {
       const nombre = document.getElementById('nombre').value.trim();
       const celular = document.getElementById('celular').value.trim();
       const dia = document.getElementById('dia').value;
@@ -116,7 +116,7 @@
         celular
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
+      await fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
         method: "POST",
         mode: "no-cors",
         headers: {
@@ -125,11 +125,19 @@
         body: JSON.stringify(datos)
       });
 
-      const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario.split(' ')[1]}.`; 
+      const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario.split(' ')[1]}.`;
       window.open(`https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`);
+
       alert("Tu turno fue reservado");
+
+      // Limpiar campos
+      document.getElementById('nombre').value = "";
+      document.getElementById('celular').value = "";
+      document.getElementById('horario').innerHTML = '<option value="">Seleccioná el horario</option>';
+
+      // Volver a cargar los horarios disponibles
+      setTimeout(cargarHorariosDisponibles, 2000);
     }
   </script>
 </body>
 </html>
-
