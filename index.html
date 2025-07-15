@@ -64,7 +64,7 @@
   </div>
 
   <script>
-    let horariosBase = Array.from({ length: 15 }, (_, i) => `${(i + 6).toString().padStart(2, '0')}:00`);
+    let horariosDisponibles = [];
 
     async function cargarHorariosDisponibles() {
       const dia = document.getElementById('dia').value;
@@ -81,9 +81,15 @@
                                   .filter(f => f[0]?.trim().toLowerCase() === dia.toLowerCase())
                                   .map(f => f[1]?.trim());
 
-      const disponibles = horariosBase.filter(hora => !turnosOcupados.includes(hora));
+      horariosDisponibles = [];
+      for (let h = 6; h <= 20; h++) {
+        const hora = `${h.toString().padStart(2, '0')}:00`;
+        if (!turnosOcupados.includes(hora)) {
+          horariosDisponibles.push(hora);
+        }
+      }
 
-      disponibles.forEach(hora => {
+      horariosDisponibles.forEach(hora => {
         const option = document.createElement('option');
         option.value = hora;
         option.textContent = hora;
@@ -104,26 +110,35 @@
         return;
       }
 
-      const datos = { dia, hora: horario, nombre, celular };
+      const datos = {
+        dia,
+        hora: horario,
+        nombre,
+        celular
+      };
 
-      await fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
+      await fetch("https://script.google.com/macros/s/AKfycbzfcAQjghYtLOxyiKQ2EBS3Zxw6XDfGQK_1Py-9oAoNd7svNGStwBGtJlxnd13AdtcW/exec", {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(datos)
       });
 
       const mensaje = `Hola! Ya reservé mi turno para el día ${dia} a las ${horario}.`;
       window.open(`https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`);
 
-      alert("Tu turno fue reservado");
+      alert("Tu turno fue reservado correctamente");
+
       document.getElementById('nombre').value = "";
       document.getElementById('celular').value = "";
       document.getElementById('horario').innerHTML = '<option value="">Seleccioná el horario</option>';
+
       setTimeout(cargarHorariosDisponibles, 1000);
     }
   </script>
 </body>
 </html>
+
 
 
