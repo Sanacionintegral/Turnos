@@ -1,35 +1,39 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turnos Sanación Energética</title>
+  <title>Reserva de Turnos</title>
   <style>
     body {
       background-color: #1f1333;
-      color: #f5f5f5;
+      color: #fff;
       font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      padding: 20px;
-      text-align: center;
+    }
+    .container {
+      background-color: #2a1946;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
     }
     h1 {
+      text-align: center;
+      margin-bottom: 20px;
       color: #d7baff;
     }
-    form {
-      background-color: #2a1946;
-      border-radius: 10px;
-      padding: 20px;
-      display: inline-block;
-    }
     input, select, button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
       border: none;
+      border-radius: 10px;
+      font-size: 16px;
     }
     button {
       background-color: #25D366;
@@ -39,95 +43,85 @@
     button:hover {
       background-color: #1ebe5d;
     }
-    #confirmacion {
-      margin-top: 20px;
-      color: #a3ffb0;
-      font-weight: bold;
+    .error {
+      color: orange;
+      font-size: 14px;
+      margin-top: -5px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <img src="Imagenturno.png" alt="Turnos Sanación" style="max-width: 250px; margin-bottom: 20px;">
-  <h1>Reservá tu turno</h1>
-
-  <form id="form-turno">
-    <input type="text" id="nombre" placeholder="Tu nombre" required>
-    <input type="tel" id="celular" placeholder="Tu celular" required>
-    <select id="dia" required>
-      <option value="">Seleccioná el día</option>
-    </select>
-    <select id="hora" required>
-      <option value="">Seleccioná el horario</option>
-    </select>
-    <button type="submit">Reservar</button>
-  </form>
-
-  <div id="confirmacion"></div>
+  <div class="container">
+    <h1>Reservá tu turno</h1>
+    <form id="turnoForm">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="celular" placeholder="Celular" required>
+      <select id="dia" required>
+        <option value="">Seleccioná el día</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+      </select>
+      <select id="hora" required>
+        <option value="">Seleccioná el horario</option>
+      </select>
+      <span class="error" id="errorMsg">Seleccioná un elemento de la lista</span>
+      <button type="submit">Reservar</button>
+    </form>
+  </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec";
+    const horarios = [
+      "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
+      "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+    ];
 
-    const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-    const horarios = [];
-    for (let h = 6; h <= 20; h++) {
-      horarios.push((h < 10 ? "0" + h : h) + ":00");
-    }
-
-    const diaSelect = document.getElementById('dia');
     const horaSelect = document.getElementById('hora');
-
-    dias.forEach(d => {
-      const op = document.createElement('option');
-      op.value = d;
-      op.textContent = d;
-      diaSelect.appendChild(op);
+    horarios.forEach(h => {
+      const option = document.createElement('option');
+      option.value = h;
+      option.textContent = h;
+      horaSelect.appendChild(option);
     });
 
-    async function cargarTurnosDisponibles() {
-      const res = await fetch(URL_SCRIPT);
-      const datos = await res.json();
-      const turnosOcupados = new Set(datos.map(d => d.Hora));
-
-      horaSelect.innerHTML = '<option value="">Seleccioná el horario</option>';
-      horarios.forEach(h => {
-        const clave = diaSelect.value + " " + h;
-        if (!turnosOcupados.has(clave)) {
-          const op = document.createElement('option');
-          op.value = h;
-          op.textContent = h;
-          horaSelect.appendChild(op);
-        }
-      });
-    }
-
-    diaSelect.addEventListener('change', cargarTurnosDisponibles);
-
-    document.getElementById('form-turno').addEventListener('submit', async e => {
+    document.getElementById('turnoForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const nombre = document.getElementById('nombre').value;
-      const celular = document.getElementById('celular').value;
-      const dia = diaSelect.value;
-      const hora = horaSelect.value;
-      const horaFinal = dia + " " + hora;
+      const nombre = document.getElementById('nombre').value.trim();
+      const celular = document.getElementById('celular').value.trim();
+      const dia = document.getElementById('dia').value;
+      const hora = document.getElementById('hora').value;
+      const errorMsg = document.getElementById('errorMsg');
 
-      const datos = {
-        nombre,
-        celular,
-        hora: horaFinal
-      };
+      if (!nombre || !celular || !dia || !hora) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+      errorMsg.style.display = 'none';
 
-      await fetch(URL_SCRIPT, {
+      const fechaTurno = `${dia} ${hora}`;
+
+      // Enviar a Google Sheets
+      await fetch("https://script.google.com/macros/s/AKfycbwvgQDgg5Hje0-phDd7N8rLqzMPlmOXCblwsAn7PW_8KegiyCga7JMSC4fvwowMSyE62A/exec", {
         method: "POST",
+        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos)
+        body: JSON.stringify({
+          fecha: new Date().toLocaleDateString(),
+          hora: fechaTurno,
+          nombre,
+          celular
+        })
       });
 
-      document.getElementById('confirmacion').textContent = `✨ Tu turno fue reservado para ${horaFinal}. Te esperamos con energía positiva ✨`;
-
-      const mensaje = `Hola! Ya reservé mi turno para el día ${horaFinal}. Gracias!`;
-      const linkWhatsapp = `https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`;
-      window.open(linkWhatsapp, '_blank');
+      // Redirigir a WhatsApp
+      const mensaje = `Hola! Ya reservé mi turno para el día ${fechaTurno}. Mi nombre es ${nombre}.`;
+      const url = `https://wa.me/542235931151?text=${encodeURIComponent(mensaje)}`;
+      window.location.href = url;
     });
   </script>
 </body>
 </html>
+
